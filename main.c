@@ -12,28 +12,29 @@
 #define HEADER_SIZE 54 //using 14 byte file header + 40 byte BITMAPINFOHEADER
 #define COLOR_PALETTE_SIZE 8 //2 colors
 #define BPP 1 //only black and white needed
-
-extern void lissajous_draw(unsigned char* pixel_array, int x, int y, int a, int b); 
+//RCX, RDX, R8, R9, stack
+extern void lissajous_draw(unsigned char* pixel_array, const unsigned int width, const unsigned int height, const unsigned int a, const unsigned int b); 
 
 unsigned char* makeBitmapBuffer(int width, int height, int* size)
 {
-    int padding = width % 4;
     int pixel_array_size = (ceil((BPP*width)/32)*4)*height;
     *size = pixel_array_size+ HEADER_SIZE + COLOR_PALETTE_SIZE;
 
     unsigned char* bmp_start = malloc(*size);
     //preparing file header
     unsigned char* bmp_ptr = bmp_start;
-    *bmp_ptr = 'B';
+    *bmp_ptr = 0x42; // B
     bmp_ptr++;
-    *bmp_ptr = 'M';
+    *bmp_ptr = 0x4D; //M
     bmp_ptr = bmp_start + 2;
-    *(unsigned int*)bmp_ptr = *size;
+    *(int*)bmp_ptr = *size;
+    bmp_ptr = bmp_start  + 6;
+    *(int*)bmp_ptr = 0;
     bmp_ptr = bmp_start + 10;
-    *(unsigned int*)bmp_ptr = HEADER_SIZE+COLOR_PALETTE_SIZE;
+    *(int*)bmp_ptr = HEADER_SIZE+COLOR_PALETTE_SIZE;
     //preparing bitmap info header
     bmp_ptr = bmp_start + 14;
-    *(unsigned int*)bmp_ptr = 40;
+    *(int*)bmp_ptr = 40;
     bmp_ptr = bmp_start + 18;
     *(int*)bmp_ptr = width;
     bmp_ptr = bmp_start + 22;
@@ -43,39 +44,43 @@ unsigned char* makeBitmapBuffer(int width, int height, int* size)
     bmp_ptr = bmp_start + 28;
     *(short int*)bmp_ptr = BPP;
     bmp_ptr = bmp_start + 30;
-    *(unsigned int*)bmp_ptr = 0;
+    *(int*)bmp_ptr = 0;
     bmp_ptr = bmp_start + 34;
-    *(unsigned int*)bmp_ptr = pixel_array_size*height;
+    *(int*)bmp_ptr = width*height;
     bmp_ptr = bmp_start + 38;
-    *(int*)bmp_ptr = 2835;
+    *(int*)bmp_ptr = 1;
     bmp_ptr = bmp_start + 42;
-    *(int*)bmp_ptr = 2835;
+    *(int*)bmp_ptr = 1;
     bmp_ptr = bmp_start + 46;
-    *(unsigned int*)bmp_ptr = 2;
+    *(int*)bmp_ptr = 2;
     bmp_ptr = bmp_start + 50;
-    *(unsigned int*)bmp_ptr = 0;
+    *(int*)bmp_ptr = 0;
     //preparing color table
     bmp_ptr = bmp_start + 54;
-    *bmp_ptr = 255;
+    *(unsigned char*)bmp_ptr = 255;
     bmp_ptr++;
-    *bmp_ptr = 255;
+    *(unsigned char*)bmp_ptr = 255;
     bmp_ptr++;
-    *bmp_ptr = 255;
+    *(unsigned char*)bmp_ptr = 255;
     bmp_ptr++;
-    *bmp_ptr = 0;
+    *(unsigned char*)bmp_ptr = 0;
     bmp_ptr = bmp_start + 58;
-    *bmp_ptr = 0;
+    *(unsigned char*)bmp_ptr = 0;
     bmp_ptr++;
-    *bmp_ptr = 0;
+    *(unsigned char*)bmp_ptr = 0;
     bmp_ptr++;
-    *bmp_ptr = 0;
+    *(unsigned char*)bmp_ptr = 0;
     bmp_ptr++;
-    *bmp_ptr = 0;
+    *(unsigned char*)bmp_ptr = 0;
+    bmp_ptr++;
     
     //filling pixel array with 0
-    bmp_ptr = bmp_start + 62;
-    memset(bmp_ptr, 0, pixel_array_size);
+    bmp_ptr = bmp_start + HEADER_SIZE + COLOR_PALETTE_SIZE;
+    memset(bmp_ptr, 0xFF, pixel_array_size);
 
+    FILE* image_file = fopen("image.bmp", "wb");
+    fwrite(bmp_start, 1, *size, image_file);
+    fclose(image_file);
     return bmp_start;
 }
 
