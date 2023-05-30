@@ -22,6 +22,11 @@ void custom_draw_spline(float* array_pointer)
     al_draw_spline(array_pointer, white, 5);
 };
 
+void custom_printf(int i)
+{
+    printf("Worked%d", i);
+};
+
 int main()
 {
     if(!al_init())
@@ -94,7 +99,7 @@ int main()
     white = al_map_rgb(255, 255, 255);
     black = al_map_rgb(0, 0, 0);
     red = al_map_rgb(255, 0, 0);
-    
+
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
