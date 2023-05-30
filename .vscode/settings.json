@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "allegro_font.h": "c",
+        "allegro_memfile.h": "c"
+    }
+}

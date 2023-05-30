@@ -10,7 +10,8 @@
 #define COLOR_PALETTE_SIZE 8 //2 colors
 #define BPP 1 //only black and white needed
 //RCX, RDX, R8, R9, stack
-extern void lissajous_draw(const unsigned int width, const unsigned int height, const unsigned int a, const unsigned int b, const unsigned int x, const unsigned int y); 
+extern void lissajous_draw(const float a, const float b, const float x, const float y, const float w1, const float w2, const float d); 
+//x and y are the center of the image, a and b are multiplied by the width and height of the image
 
 ALLEGRO_COLOR white;
 ALLEGRO_COLOR black;
@@ -18,7 +19,7 @@ ALLEGRO_COLOR red;
 
 void custom_draw_spline(float* array_pointer)
 {
-    al_draw_spline(array_pointer, white, 10);
+    al_draw_spline(array_pointer, white, 5);
 };
 
 int main()
@@ -93,10 +94,7 @@ int main()
     white = al_map_rgb(255, 255, 255);
     black = al_map_rgb(0, 0, 0);
     red = al_map_rgb(255, 0, 0);
-
-    ALLEGRO_COLOR empty;
-    printf("Size of ALLEGRO_COLOR: %zu bytes\n", sizeof(empty));
-
+    
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
@@ -104,6 +102,7 @@ int main()
     bool done = false;
     bool redraw = true;
     bool elf = false;
+    bool draw_curve = false;
 
     ALLEGRO_EVENT event;
 
@@ -122,6 +121,7 @@ int main()
             case ALLEGRO_EVENT_KEY_DOWN:
                 if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) { done = true; }
                 else if (event.keyboard.keycode == ALLEGRO_KEY_E) { elf = !elf;}
+                else if (event.keyboard.keycode == ALLEGRO_KEY_F) {draw_curve = !draw_curve;}
                 else { done = false; }
                 break;
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
@@ -149,6 +149,7 @@ int main()
             // al_draw_bitmap(lissajeou_shape, 158, 59, 0);
 
             al_draw_rectangle(158,60,865,767, red, 2);
+            if (draw_curve) {lissajous_draw(100, 100, 511, 413, 7, 6, 0.5);}
 
             if (elf) {  al_draw_bitmap(edomae_elf, 100, 100, 0);    }
             // al_draw_line()
