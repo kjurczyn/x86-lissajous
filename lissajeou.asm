@@ -19,6 +19,7 @@ section .data
 section .text 
 	global lissajous_draw
 	extern custom_draw_spline
+	extern custom_printf
 lissajous_draw:
 ; Prolog
 ; Moving args into memory
@@ -48,6 +49,9 @@ lissajous_draw:
 
 	
 ; Main
+	mov rcx, 1
+	call custom_printf
+
 	fninit
 	fldpi
 	mov rax, temp
@@ -105,11 +109,12 @@ calculate_loop:
 	mov [rax], eax
 
 ; incrementing t 1
-	mov rax, t
-	fld dword [rax] ; st0 = t
+	mov r11, t
+	fld dword [r11] ; st0 = t
 	mov rax, increment
 	fld dword [rax] ;st0 = increment
 	faddp ; st0 = t + increment
+	fst dword [r11]
 
 	;calculate next x
 	mov rax, w1
@@ -146,11 +151,12 @@ calculate_loop:
 	fstp dword [rax] ; point_list[1] =  center y + b*sin(w2*t), st0 = empty
 
 ; incrementing t 2
-	mov rax, t
-	fld dword [rax] ; st0 = t
+	mov r11, t
+	fld dword [r11] ; st0 = t
 	mov rax, increment
 	fld dword [rax] ;st0 = increment
 	faddp ; st0 = t + increment
+	fst dword [r11]
 
 	;calculate next x
 	mov rax, w1
@@ -187,11 +193,12 @@ calculate_loop:
 	fstp dword [rax] ; point_list[1] =  center y + b*sin(w2*t), st0 = empty
 
 ; incrementing t 3
-	mov rax, t
-	fld dword [rax] ; st0 = t
+	mov r11, t
+	fld dword [r11] ; st0 = t
 	mov rax, increment
 	fld dword [rax] ;st0 = increment
 	faddp ; st0 = t + increment
+	fst dword [r11]
 
 	;calculate next x
 	mov rax, w1
@@ -227,8 +234,11 @@ calculate_loop:
 	mov rax, point_list+28
 	fstp dword [rax] ; point_list[1] =  center y + b*sin(w2*t), st0 = empty
 
-	mov rcx, point_list
-	call custom_draw_spline ; draw the thing
+	; mov rcx, point_list
+	
+	; call custom_draw_spline ; draw the thing
+
+	; call custom_printf
 
 	mov rax, t
 	fld dword [rax];
@@ -237,6 +247,8 @@ calculate_loop:
 	ucomiss xmm0, xmm1 ; 2pi ? t
 	jg calculate_loop ; jump if 2pi > t
 
+	mov rcx, 2
+	call custom_printf
 
 	
 
