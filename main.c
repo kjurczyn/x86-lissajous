@@ -8,7 +8,7 @@
 #include <allegro5/allegro_memfile.h>
 
 //RCX, RDX, R8, R9, stack
-extern void lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int length, const double w1, const double w2, const double d); 
+extern void lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int half_length, const double w1, const double w2, const double d); 
 
 
 int main()
@@ -159,7 +159,7 @@ int main()
             if (lissajeou_changed)
             {   
                 pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGB_888, ALLEGRO_LOCK_READWRITE);
-                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  700, 1, 2, 0);
+                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  350, 1.0, 2.0, 0);
                 al_unlock_bitmap(lissajeous_bitmap);
                 al_draw_bitmap(lissajeous_bitmap, 165,67, 0);
             }
