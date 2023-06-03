@@ -1,81 +1,71 @@
-section .data
-	width: dq 0
-	height: dq 0
-	pixel_array_address: dq 0
-	a: dq 0
-	b: dq 0
-	c_x: dq 0
-	c_y: dq 0
-	p_x: dq 0
-	p_y: dq 0
+; The registers RAX, RCX, RDX, R8, R9, R10, R11 are considered volatile (caller-saved).[25]
+;The registers RBX, RBP, RDI, RSI, RSP, R12, R13, R14, and R15 are considered nonvolatile (callee-saved).[25]
 
-; //rcx, rdx, r8, r9, stack
-section .text 
+section .data
+	data: dq 0
+	pitch: dd 0
+	length: dd 0
+	w1: dq 0
+	w2: dq 0
+	d: dq 0
+
+section .text
 	global lissajous_draw
 lissajous_draw:
-; Prolog
-; Moving args into memory
-	mov rax, pixel_array_address
+; lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int length, const double w1, const double w2, const double d)
+; pixel address = data_pointer + x * pixel_size(4 bytes) + pitch * y
+; rcx = pointer to pixel array
+; prologue
+	mov rax, data
 	mov [rax], rcx
-	mov rax, width
-	mov [rax], rdx
-	mov rax, height
-	mov [rax], r8
-	mov rax, a
-	mov [rax], r9
-	mov rax, b
-	pop rbx
-	mov [rax], rbx
-
-
-
+	mov rax, pitch
+	mov [rax], edx
+	mov rax, length
+	mov [rax], r8d
+	mov rax, w1
+	fstp qword [rax]
+	mov rax, w2
+	fstp qword [rax]
+	mov rax, d
+	fstp qword [rax]
+	 
 	push rbp
 	mov rbp, rsp
-; Main
+	push rbx
+	push r12
+	push r13
+	push r14
+	push r15
+; end prologue
+	mov r12, 0 ; x
+	mov r13, 0 ; y
+	mov r14, 0 ; x + y
+	; rcx = pointer
+	; pitch = edx/rax
+	mov rax, length
+	mov r15d, [rax]
+	mov rax, pitch
+	mov r10d, [rax]
+main_loop:
+	xor r14, r14
+	add r14, r13
+	add r14, r12
+	mov dword [rcx+r14], 0x0
+	add r12, 4
+	cmp r12, r15
+	jl main_loop
+	xor r12, r12
+	add r13, r10
+	cmp r13, 10000
+	jl main_loop
 
 
-	
 
-
-
-	
-
-; Epilog
+; epilogue
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
-	ret
-; DrawLine
-draw_line:
-; 	dx = x2 − x1
-; 	dy = y2 − y1
-; 	for x from x1 to x2 do
-;     	y = y1 + dy × (x − x1) / dx
-;     	plot(x, y)
-;
-; 	rcx = x1, rdx = y1, r8 = x2, r9 = y2
-	mov r10, rcx ; r10 = x1
-	mov r11, r8	 ; r11 = x2
-	sub r11, r10 ; r11 = x2-x1
-	mov r12, rdx ; r12 = y1
-	mov r13, r9	 ; r13 = y2
-	sub r13, r12 ; r13 = y2-y1
-draw_line_loop:
-	; r10 = current x
-	; r9 = y
-	; r12 = x - x1
-	; sub r12, r11 = r12 - r11
-	mov r9, rdx ; r9 = y1
-	mov r12, r10 ; r12 = x
-	sub r12, rcx ; r12 = x - x1
-	imul r12, r13 ; r12 = dy * (x-x1)
-	mov rax, r12
-	push rdx
-	xor rdx, rdx
-	idiv r11 ; rax = dy * (x-x1) / dx
-	pop rdx
-	add r9, rax ; r9 = y1 + dy × (x − x1) / dx
-
-;Plotting (x, y) = (r10, r9)
 	
-
-	ret
-
