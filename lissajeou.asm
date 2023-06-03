@@ -46,17 +46,19 @@ lissajous_draw:
 	mov r15d, [rax]
 	mov rax, pitch
 	mov r10d, [rax]
+	mov r9, r10
+	imul r9, 100
 main_loop:
 	xor r14, r14
 	add r14, r13
 	add r14, r12
 	mov dword [rcx+r14], 0x0
 	add r12, 4
-	cmp r12, r15
+	cmp r12, r10
 	jl main_loop
 	xor r12, r12
 	add r13, r10
-	cmp r13, 10000
+	cmp r13, r9
 	jl main_loop
 
 
