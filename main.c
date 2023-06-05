@@ -104,7 +104,7 @@ int main()
                     lissajeou_changed = true;
                     break;
                  case ALLEGRO_KEY_RIGHT:
-                    w2 = w2 + 1;
+                    w2 = w2 + 0.1;
                     lissajeou_changed = true;
                     break;
                  case ALLEGRO_KEY_W:

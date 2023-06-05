@@ -8,7 +8,7 @@ asm :
 cc :
 	$(CC) -c -g -m64 main.c
 link :
-	$(CC) -o x64/$(FUN_NAME) main.o -lallegro -lallegro_image -lallegro_font -lallegro_ttf -lallegro_memfile -lallegro_primitives $(FUN_NAME).o
+	$(CC) -o x64/$(FUN_NAME) main.o -lallegro -lallegro_image -lallegro_font $(FUN_NAME).o
 	xcopy data x64\data /y /q
 	
 clean :
