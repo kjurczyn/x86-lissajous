@@ -1,81 +1,108 @@
-section .data
-	width: dq 0
-	height: dq 0
-	pixel_array_address: dq 0
-	a: dq 0
-	b: dq 0
-	c_x: dq 0
-	c_y: dq 0
-	p_x: dq 0
-	p_y: dq 0
+; The registers RAX, RCX, RDX, R8, R9, R10, R11 are considered volatile (caller-saved).[25]
+;The registers RBX, RBP, RDI, RSI, RSP, R12, R13, R14, and R15 are considered nonvolatile (callee-saved).[25]
 
-; //rcx, rdx, r8, r9, stack
-section .text 
+section .data
+	interval: dq 0.001
+	max: dq 6.283185307179586
+
+section .text
 	global lissajous_draw
 lissajous_draw:
-; Prolog
-; Moving args into memory
-	mov rax, pixel_array_address
-	mov [rax], rcx
-	mov rax, width
-	mov [rax], rdx
-	mov rax, height
-	mov [rax], r8
-	mov rax, a
-	mov [rax], r9
-	mov rax, b
-	pop rbx
-	mov [rax], rbx
-
-
-
+; lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int length, const double w1, const double w2, const double d)
+; pixel address = data_pointer + x * pixel_size(4 bytes) + pitch * y
+; rcx = pointer to pixel array
+; xmm0 = w1
+; xmm1 = w2
+; xmm2 = d
+; xmm3 = length
+; xmm4 = t
+; xmm5 = interval
+; xmm6 = 2pi
+; xmm7 = x
+; xmm8 - y
+; prologue
+	CVTSI2SD xmm3, r8
+	 
 	push rbp
+	push rbx
+	push r12
+	push r13
+	push r14
+	push r15
+	push rsi
+	push rdi
 	mov rbp, rsp
-; Main
 
+; end prologue
 
+	
+; preparing registers for loop
+	finit
+	mov r15, 0;
+	cvtsi2sd xmm4, r15 ; t = 0
+	mov r15, 1
+	cvtsi2sd xmm10, r15
+	subsd xmm3, xmm10
+	mov rax, interval
+	movsd xmm5, [rax]
+	mov rax, max
+	movsd xmm6, [rax]
+; xmm0 = w1
+; xmm1 = w2
+; xmm2 = d
+; xmm3 = length
+; xmm4 = t
+; xmm5 = interval
+; xmm6 = 2pi
+; xmm7 = x
+; xmm8 - y
+main_loop:
+	;calc x
+	movsd xmm7, xmm0
+	mulsd xmm7, xmm4
+	movsd [rsp-64], xmm7
+	fld qword [rsp-64]
+	fsin
+	fstp qword [rsp-64]
+	movsd xmm7, [rsp-64]
+	mulsd xmm7, xmm3
+	CVTSD2SI r12, xmm7
+
+	add r12, r8
+	shl r12, 2
+	
+
+	;calc y
+	movsd xmm8, xmm1
+	mulsd xmm8, xmm4
+	movsd [rsp-64], xmm8
+	fld qword [rsp-64]
+	fsin
+	fstp qword [rsp-64]
+	movsd xmm8, [rsp-64]
+	mulsd xmm8, xmm3
+	CVTSD2SI r13, xmm8
+
+	add r13, r8
+	imul r13, rdx
+
+	; color pixel	
+	add r13, r12
+	mov dword [rcx+r13], 0xFFFFFFFF
+
+	addsd xmm4, xmm5 ; increment t
+	comisd xmm4, xmm6
+	jb main_loop
 	
 
 
-
-	
-
-; Epilog
+; epilogue
+	pop rdi
+	pop rsi
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop rbx
 	pop rbp
 	ret
-; DrawLine
-draw_line:
-; 	dx = x2 − x1
-; 	dy = y2 − y1
-; 	for x from x1 to x2 do
-;     	y = y1 + dy × (x − x1) / dx
-;     	plot(x, y)
-;
-; 	rcx = x1, rdx = y1, r8 = x2, r9 = y2
-	mov r10, rcx ; r10 = x1
-	mov r11, r8	 ; r11 = x2
-	sub r11, r10 ; r11 = x2-x1
-	mov r12, rdx ; r12 = y1
-	mov r13, r9	 ; r13 = y2
-	sub r13, r12 ; r13 = y2-y1
-draw_line_loop:
-	; r10 = current x
-	; r9 = y
-	; r12 = x - x1
-	; sub r12, r11 = r12 - r11
-	mov r9, rdx ; r9 = y1
-	mov r12, r10 ; r12 = x
-	sub r12, rcx ; r12 = x - x1
-	imul r12, r13 ; r12 = dy * (x-x1)
-	mov rax, r12
-	push rdx
-	xor rdx, rdx
-	idiv r11 ; rax = dy * (x-x1) / dx
-	pop rdx
-	add r9, rax ; r9 = y1 + dy × (x − x1) / dx
-
-;Plotting (x, y) = (r10, r9)
-	
-
-	ret
-
