@@ -2,16 +2,8 @@
 ;The registers RBX, RBP, RDI, RSI, RSP, R12, R13, R14, and R15 are considered nonvolatile (callee-saved).[25]
 
 section .data
-	data: dq 0
-	pitch: dd 0
-	length: dd 0
-	w1: dq 0
-	w2: dq 0
-	d: dq 0
-	temp: dq 0
-	interval: dq 0.01
+	interval: dq 0.001
 	max: dq 6.283185307179586
-	t: dq 0
 
 section .text
 	global lissajous_draw
@@ -29,19 +21,7 @@ lissajous_draw:
 ; xmm7 = x
 ; xmm8 - y
 ; prologue
-	mov rax, data
-	mov [rax], rcx
-	mov rax, pitch
-	mov [rax], edx
-	mov rax, length
-	mov dword [rax], r8d
 	CVTSI2SD xmm3, r8
-	mov rax, w1
-	movsd [rax], xmm0 
-	mov rax, w2
-	movsd [rax], xmm1
-	mov rax, d
-	movsd [rax], xmm2
 	 
 	push rbp
 	push rbx
@@ -52,7 +32,6 @@ lissajous_draw:
 	push rsi
 	push rdi
 	mov rbp, rsp
-	;sub rsp, 64
 
 ; end prologue
 
@@ -61,6 +40,9 @@ lissajous_draw:
 	finit
 	mov r15, 0;
 	cvtsi2sd xmm4, r15 ; t = 0
+	mov r15, 1
+	cvtsi2sd xmm10, r15
+	subsd xmm3, xmm10
 	mov rax, interval
 	movsd xmm5, [rax]
 	mov rax, max
@@ -106,7 +88,7 @@ main_loop:
 
 	; color pixel	
 	add r13, r12
-	mov dword [rcx+r13], 0x000000FF
+	mov dword [rcx+r13], 0xFFFFFFFF
 
 	addsd xmm4, xmm5 ; increment t
 	comisd xmm4, xmm6
@@ -115,7 +97,6 @@ main_loop:
 
 
 ; epilogue
-	;add rsp, 64
 	pop rdi
 	pop rsi
 	pop r15

@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <allegro5/allegro5.h>
-#include <allegro5/allegro_font.h>
 #include <allegro5/keyboard.h>
 #include <allegro5/allegro_image.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_memfile.h>
 
 //RCX, RDX, R8, R9, stack
 extern void lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int half_length, const double w1, const double w2, const double d); 
@@ -39,7 +35,7 @@ int main()
         return 1;
     }
 
-    ALLEGRO_DISPLAY* disp = al_create_display(700, 700);
+    ALLEGRO_DISPLAY* disp = al_create_display(701, 701);
     if(!disp)
     {
         printf("couldn't initialize display\n");
@@ -72,12 +68,6 @@ int main()
     al_set_new_bitmap_format(ALLEGRO_PIXEL_FORMAT_RGBA_8888);
 
     ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(100, 100);
-    al_set_target_bitmap(lissajeous_bitmap);
-    al_clear_to_color(white);
-    al_set_target_bitmap(al_get_backbuffer(disp));
-
-    ALLEGRO_BITMAP* bitmap_scaled = al_create_bitmap(700, 700);
-    
     ALLEGRO_LOCKED_REGION* pixel_array_area = NULL;
 
     ALLEGRO_EVENT event;
@@ -109,13 +99,28 @@ int main()
                     lissajeou_changed = true;
                     break;
                  case ALLEGRO_KEY_LEFT:
-                    w2 = (w2-0.1 > 0) ? w2 - 0.1 : w2 ;
+                    w2 = w2 - 0.1 ;
                     lissajeou_changed = true;
                     break;
                  case ALLEGRO_KEY_RIGHT:
-                    w2 = w2 + 0.1;
+                    w2 = w2 + 1;
                     lissajeou_changed = true;
                     break;
+                 case ALLEGRO_KEY_W:
+                    w1 = w1 + 1;
+                    lissajeou_changed = true;
+                    break;
+                case ALLEGRO_KEY_S:
+                    w1 = w1 - 1;
+                    lissajeou_changed = true;
+                    break;
+                 case ALLEGRO_KEY_A:
+                    w2 = w2 - 1 ;
+                    lissajeou_changed = true;
+                    break;
+                 case ALLEGRO_KEY_D:
+                    w2 = w2 + 1;
+                    lissajeou_changed = true;
                 default:
                     done = false;
                     break;
@@ -131,18 +136,16 @@ int main()
 
         if(redraw && al_is_event_queue_empty(queue))
         {
-            al_clear_to_color(black);
-            
             if (lissajeou_changed)
             {   
+                lissajeous_bitmap = al_create_bitmap(100, 100);
                 pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
                 lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  50, w1, w2, 0);
                 al_unlock_bitmap(lissajeous_bitmap);
                 lissajeou_changed = false;
             }
-
-            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, 100, 100, 0, 0, 700, 700, 0);
-            //al_draw_rectangle(165,67,865,767, red, 2);
+            al_clear_to_color(black);
+            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, 100, 100, 0, 0, 701, 701, 0);
             al_flip_display();
             redraw = false;
         }
@@ -152,8 +155,7 @@ int main()
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
     al_destroy_bitmap(lissajeous_bitmap);
-    al_destroy_bitmap(bitmap_scaled);
-   
+
     // al_destroy_path(path);
 
     return 0;
