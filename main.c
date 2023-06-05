@@ -39,44 +39,16 @@ int main()
         return 1;
     }
 
-    ALLEGRO_DISPLAY* disp = al_create_display(1024, 768);
+    ALLEGRO_DISPLAY* disp = al_create_display(700, 700);
     if(!disp)
     {
         printf("couldn't initialize display\n");
         return 1;
     }
 
-    if(! al_init_font_addon() || !al_init_ttf_addon())
-    {
-        printf("couldn't initialize font addon\n");
-        return 1;
-    }
-
-    ALLEGRO_FONT* font = al_load_ttf_font("data/Roboto-Regular.ttf", 20, 0);
-
-    if(!font)
-    {   
-        printf("couldn't initialize font\n");
-        return 1;
-    }
-
     if(!al_init_image_addon())
     {
         printf("couldn't initialize image addon\n");
-        return 1;
-    }
-
-    ALLEGRO_BITMAP* edomae_elf = al_load_bitmap("data/edomae_elf.png");
-    if(!edomae_elf)
-    {
-        printf("couldn't load elf :(\n");
-        return 1;
-    }
-
-
-    if(!al_init_primitives_addon())
-    {
-        printf("couldn't initialize primitives addon\n");
         return 1;
     }
 
@@ -91,22 +63,20 @@ int main()
 
     bool done = false;
     bool redraw = true;
-    bool elf = false;
-    bool lissajeou_changed = false;
+    bool lissajeou_changed = true;
     
-    int a = 1;
-    int b = 1;
+    double w1 = 1;
+    double w2 = 4;
 
     al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
     al_set_new_bitmap_format(ALLEGRO_PIXEL_FORMAT_RGBA_8888);
 
-    ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(700, 700);
+    ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(100, 100);
     al_set_target_bitmap(lissajeous_bitmap);
     al_clear_to_color(white);
     al_set_target_bitmap(al_get_backbuffer(disp));
-    // al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
-    
-    // al_unlock_bitmap(lissajeous_bitmap);
+
+    ALLEGRO_BITMAP* bitmap_scaled = al_create_bitmap(700, 700);
     
     ALLEGRO_LOCKED_REGION* pixel_array_area = NULL;
 
@@ -130,11 +100,21 @@ int main()
                 case ALLEGRO_KEY_ESCAPE:
                     done = true;
                     break;
-                case ALLEGRO_KEY_E:
-                    elf = !elf;
+                case ALLEGRO_KEY_UP:
+                    w1 = w1 + 0.1;
+                    lissajeou_changed = true;
                     break;
-                case ALLEGRO_KEY_F:
-                    lissajeou_changed = !lissajeou_changed;
+                case ALLEGRO_KEY_DOWN:
+                    w1 = w1 - 0.1;
+                    lissajeou_changed = true;
+                    break;
+                 case ALLEGRO_KEY_LEFT:
+                    w2 = (w2-0.1 > 0) ? w2 - 0.1 : w2 ;
+                    lissajeou_changed = true;
+                    break;
+                 case ALLEGRO_KEY_RIGHT:
+                    w2 = w2 + 0.1;
+                    lissajeou_changed = true;
                     break;
                 default:
                     done = false;
@@ -153,31 +133,26 @@ int main()
         {
             al_clear_to_color(black);
             
-            al_draw_text(font, white, 0, 0, 0, "Press ESC to exit, E for elf");
-            al_draw_text(font, white, 0, 20, 0, "Use UP/DOWN key to control wave frequency 1, LEFT/RIGHT to control wave frequency 2");
-            
             if (lissajeou_changed)
             {   
-                pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGB_888, ALLEGRO_LOCK_READWRITE);
-                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  350, 1.0, 2.0, 0);
+                pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
+                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  50, w1, w2, 0);
                 al_unlock_bitmap(lissajeous_bitmap);
-                al_draw_bitmap(lissajeous_bitmap, 165,67, 0);
+                lissajeou_changed = false;
             }
-            
-            al_draw_rectangle(165,67,865,767, red, 2);
 
-            if (elf) {  al_draw_bitmap(edomae_elf, 100, 100, 0);    }
+            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, 100, 100, 0, 0, 700, 700, 0);
+            //al_draw_rectangle(165,67,865,767, red, 2);
             al_flip_display();
             redraw = false;
         }
     }
 
-    al_destroy_font(font);
     al_destroy_display(disp);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
-    al_destroy_bitmap(edomae_elf);
     al_destroy_bitmap(lissajeous_bitmap);
+    al_destroy_bitmap(bitmap_scaled);
    
     // al_destroy_path(path);
 
