@@ -4,6 +4,8 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 
+#define IMAGE_SIZE 100
+
 extern void lissajous_draw(void* pixel_array, const unsigned int pitch, const unsigned int half_length, const double w1, const double w2, const double d); 
 
 
@@ -68,7 +70,7 @@ int main()
     al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
     al_set_new_bitmap_format(ALLEGRO_PIXEL_FORMAT_RGBA_8888);
 
-    ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(100, 100);
+    ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(IMAGE_SIZE, IMAGE_SIZE);
     ALLEGRO_LOCKED_REGION* pixel_array_area = NULL;
 
     ALLEGRO_EVENT event;
@@ -139,16 +141,16 @@ int main()
         {
             if (lissajeou_changed)
             {   
-                lissajeous_bitmap = al_create_bitmap(100, 100);
                 pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
-                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  50, w1, w2, 0);
+                memset(pixel_array_area->data, 0x0, pixel_array_area->pitch*IMAGE_SIZE);
+                lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  IMAGE_SIZE/2, w1, w2, 0);
                 al_unlock_bitmap(lissajeous_bitmap);
                 lissajeou_changed = false;
             }
             al_clear_to_color(black);
             al_draw_textf(font, white, 0, 710, 0, "W1: %f", w1);
             al_draw_textf(font, white, 0, 720, 0, "W2: %f", w2);
-            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, 100, 100, 0, 0, 700, 700, 0);
+            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, IMAGE_SIZE, IMAGE_SIZE, 0, 0, 700, 700, 0);
             al_flip_display();
             redraw = false;
         }
