@@ -62,7 +62,7 @@ int main()
 
     bool done = false;
     bool redraw = true;
-    bool lissajeou_changed = true;
+    bool lissajous_changed = true;
     
     double w1 = 1;
     double w2 = 4;
@@ -70,7 +70,7 @@ int main()
     al_set_new_bitmap_flags(ALLEGRO_MEMORY_BITMAP);
     al_set_new_bitmap_format(ALLEGRO_PIXEL_FORMAT_RGBA_8888);
 
-    ALLEGRO_BITMAP* lissajeous_bitmap = al_create_bitmap(IMAGE_SIZE, IMAGE_SIZE);
+    ALLEGRO_BITMAP* lissajous_bitmap = al_create_bitmap(IMAGE_SIZE, IMAGE_SIZE);
     ALLEGRO_LOCKED_REGION* pixel_array_area = NULL;
 
     ALLEGRO_EVENT event;
@@ -95,35 +95,35 @@ int main()
                     break;
                 case ALLEGRO_KEY_UP:
                     w1 = w1 + 0.1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                 case ALLEGRO_KEY_DOWN:
                     w1 = w1 - 0.1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                  case ALLEGRO_KEY_LEFT:
                     w2 = w2 - 0.1 ;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                  case ALLEGRO_KEY_RIGHT:
                     w2 = w2 + 0.1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                  case ALLEGRO_KEY_W:
                     w1 = w1 + 1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                 case ALLEGRO_KEY_S:
                     w1 = w1 - 1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                  case ALLEGRO_KEY_A:
                     w2 = w2 - 1 ;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                     break;
                  case ALLEGRO_KEY_D:
                     w2 = w2 + 1;
-                    lissajeou_changed = true;
+                    lissajous_changed = true;
                 default:
                     done = false;
                     break;
@@ -139,18 +139,18 @@ int main()
 
         if(redraw && al_is_event_queue_empty(queue))
         {
-            if (lissajeou_changed)
+            if (lissajous_changed)
             {   
-                pixel_array_area = al_lock_bitmap(lissajeous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
+                pixel_array_area = al_lock_bitmap(lissajous_bitmap, ALLEGRO_PIXEL_FORMAT_RGBA_8888, ALLEGRO_LOCK_READWRITE);
                 memset(pixel_array_area->data, 0x0, pixel_array_area->pitch*IMAGE_SIZE);
                 lissajous_draw(pixel_array_area->data, pixel_array_area->pitch,  IMAGE_SIZE/2, w1, w2, 0);
-                al_unlock_bitmap(lissajeous_bitmap);
-                lissajeou_changed = false;
+                al_unlock_bitmap(lissajous_bitmap);
+                lissajous_changed = false;
             }
             al_clear_to_color(black);
             al_draw_textf(font, white, 0, 710, 0, "W1: %f", w1);
             al_draw_textf(font, white, 0, 720, 0, "W2: %f", w2);
-            al_draw_scaled_bitmap(lissajeous_bitmap, 0,0, IMAGE_SIZE, IMAGE_SIZE, 0, 0, 700, 700, 0);
+            al_draw_scaled_bitmap(lissajous_bitmap, 0,0, IMAGE_SIZE, IMAGE_SIZE, 0, 0, 700, 700, 0);
             al_flip_display();
             redraw = false;
         }
@@ -159,7 +159,7 @@ int main()
     al_destroy_display(disp);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
-    al_destroy_bitmap(lissajeous_bitmap);
+    al_destroy_bitmap(lissajous_bitmap);
 
     // al_destroy_path(path);
 
